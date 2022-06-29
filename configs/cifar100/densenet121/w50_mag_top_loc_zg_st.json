@@ -1,0 +1,39 @@
+{
+    "name": "cifar100/densenet121/w50_mag_top_loc_zg_st",
+    "task_parameters": {
+        "gpu": true,
+        "net": "densenet121",
+        "warm": 0,
+        "resume": true,
+        "resume_from": "./checkpoints/cifar100/densenet121/baseline",
+        "resume_after_convert": false,
+        "EPOCH": 75,
+        "lr": 0.02,
+        "MILESTONES": [
+            45,
+            65
+        ],
+        "record_after": 61
+    },
+    "$checkpoint_path": "CHECKPOINT_PATH",
+    "qsparse_parameters": {
+        "conversions": [
+            {
+                "op": "prune",
+                "sparsity": 0.5,
+                "callback": "MagnitudePruningCallback",
+                "stop_mask_refresh": 38,
+                "start": 36,
+                "interval": 0.5,
+                "mask_refresh_interval": 0.5,
+                "running_average": false,
+                "repetition": 5,
+                "weight_layers": [
+                    "Conv2d"
+                ],
+                "structure": true
+            }
+        ],
+        "apoz": ""
+    }
+}

@@ -1,0 +1,47 @@
+{
+    "name": "cifar100/mobilenetv2/w75_mag_top_loc_zg_st",
+    "task_parameters": {
+        "gpu": true,
+        "net": "mobilenetv2",
+        "warm": 0,
+        "resume": true,
+        "resume_from": "./checkpoints/cifar100/mobilenetv2/baseline",
+        "resume_after_convert": false,
+        "EPOCH": 75,
+        "lr": 0.02,
+        "MILESTONES": [
+            45,
+            65
+        ],
+        "record_after": 61
+    },
+    "$checkpoint_path": "CHECKPOINT_PATH",
+    "qsparse_parameters": {
+        "conversions": [
+            {
+                "op": "prune",
+                "sparsity": 0.75,
+                "callback": "MagnitudePruningCallback",
+                "stop_mask_refresh": 8,
+                "start": 6,
+                "interval": 0.5,
+                "mask_refresh_interval": 0.5,
+                "running_average": false,
+                "repetition": 5,
+                "weight_layers": [
+                    "Conv2d"
+                ],
+                "excluded_weight_layer_indexes": [
+                    [
+                        "Conv2d",
+                        [
+                            -1
+                        ]
+                    ]
+                ],
+                "structure": true
+            }
+        ],
+        "apoz": ""
+    }
+}

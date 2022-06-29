@@ -1,0 +1,14 @@
+#!/usr/bin/python3.8
+import sys
+
+if __name__ == "__main__":
+    cmd = sys.argv[1].strip()
+    if cmd.startswith("citys/"):
+        script = './segmentation/train.py'
+    elif cmd.startswith("cifar100"):
+        script = "./classification/train.py"
+    elif cmd.startswith("citysgan"):
+        script = "./style_transfer/train.py"
+    else:
+        raise RuntimeError("Unknown command")
+    print(f"bash ./exp_runner.sh {script} ./configs/{cmd}")

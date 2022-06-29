@@ -1,0 +1,135 @@
+{
+    "name": "citysgan/res/a50_w4a8_t_st",
+    "task_parameters": {
+        "size": 1.0,
+        "direction": "BtoA",
+        "netG": "resnet_6blocks",
+        "dataroot": "/home/jovyan/cyclegan/",
+        "name": "cityscape_cyclegan",
+        "pool_size": 50,
+        "no_dropout": true,
+        "n_epochs": 10,
+        "n_epochs_decay": 20,
+        "lr": 0.0001,
+        "load_size": 143,
+        "crop_size": 128,
+        "save_latest_freq": 15000,
+        "save_epoch_freq": 10,
+        "fid_cache": "/home/jovyan/cyclegan/fid_stat.A.npz",
+        "record_after": 3,
+        "resume_after_convert": true,
+        "resume_from": "checkpoints/citysgan/res/a50_mag_top_loc_st/cityscape_cyclegan"
+    },
+    "$checkpoint_path": "checkpoints_dir",
+    "qsparse_parameters": {
+        "gradual_pruning": {
+            "batch": 1,
+            "from": "top",
+            "interval": 0.5,
+            "mask_refresh_interval": 0.1,
+            "start": 0.1,
+            "freeze_during_pruning": false
+        },
+        "conversions": [
+            {
+                "op": "quantize",
+                "bits": 4,
+                "channelwise": 0,
+                "timeout": 0.5,
+                "group_num": -1,
+                "callback": "ScalerQuantizer",
+                "weight_layers": [
+                    "Conv2d"
+                ],
+                "excluded_weight_layer_indexes": [
+                    [
+                        "Conv2d",
+                        [
+                            -1
+                        ]
+                    ]
+                ]
+            },
+            {
+                "op": "quantize",
+                "bits": 4,
+                "channelwise": 1,
+                "timeout": 0.5,
+                "group_num": -1,
+                "callback": "ScalerQuantizer",
+                "weight_layers": [
+                    "ConvTranspose2d"
+                ]
+            },
+            {
+                "op": "quantize",
+                "bits": 8,
+                "channelwise": 0,
+                "timeout": 0.5,
+                "group_num": -1,
+                "callback": "ScalerQuantizer",
+                "weight_layers": [
+                    "Conv2d"
+                ],
+                "filter": "model.23"
+            },
+            {
+                "op": "prune",
+                "sparsity": 0.5,
+                "callback": "MagnitudePruningCallback",
+                "order": "pre",
+                "activation_layers": [
+                    "Conv2d",
+                    "ConvTranspose2d"
+                ],
+                "excluded_activation_layer_indexes": [
+                    [
+                        "Conv2d",
+                        [
+                            0
+                        ]
+                    ]
+                ],
+                "structure": true
+            },
+            {
+                "op": "quantize",
+                "bits": 8,
+                "channelwise": -1,
+                "group_num": -1,
+                "timeout": 0.1,
+                "callback": "AdaptiveLineQuantizer",
+                "activation_layers": [
+                    "Conv2d",
+                    "ConvTranspose2d"
+                ],
+                "order": "pre",
+                "spa": false,
+                "excluded_activation_layer_indexes": [
+                    [
+                        "Conv2d",
+                        [
+                            0,
+                            -1
+                        ]
+                    ]
+                ]
+            },
+            {
+                "op": "quantize",
+                "bits": 8,
+                "channelwise": -1,
+                "group_num": -1,
+                "timeout": 0.1,
+                "callback": "AdaptiveLineQuantizer",
+                "activation_layers": [
+                    "Conv2d"
+                ],
+                "order": "pre",
+                "spa": false,
+                "filter": "model.23"
+            }
+        ],
+        "apoz": ""
+    }
+}

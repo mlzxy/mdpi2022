@@ -1,0 +1,63 @@
+{
+    "name": "citysgan/unet/w50_mag_top_loc_st_nly",
+    "task_parameters": {
+        "size": 1.0,
+        "direction": "BtoA",
+        "netG": "unet_256",
+        "dataroot": "/home/jovyan/Cityscapes_pix2pix/cityscapes",
+        "batch_size": 3,
+        "name": "cityscapes_pix2pix",
+        "pool_size": 0,
+        "gan_mode": "vanilla",
+        "dataset_mode": "aligned",
+        "model": "pix2pix",
+        "no_dropout": true,
+        "n_epochs": 20,
+        "n_epochs_decay": 80,
+        "lr": 0.0002,
+        "lambda_L1": 100,
+        "load_size": 286,
+        "crop_size": 256,
+        "norm": "batch",
+        "save_latest_freq": 15000,
+        "save_epoch_freq": 10,
+        "display_freq": 4000,
+        "fid_cache": "/home/jovyan/Cityscapes_pix2pix/fid_stat.A.256.npz",
+        "record_after": 12,
+        "resume_after_convert": false,
+        "resume_from": "checkpoints/citysgan/unet/baseline/cityscapes_pix2pix"
+    },
+    "$checkpoint_path": "checkpoints_dir",
+    "qsparse_parameters": {
+        "gradual_pruning": {
+            "batch": 1,
+            "from": "top",
+            "interval": 0.5,
+            "mask_refresh_interval": 0.1,
+            "start": 0.1,
+            "freeze_during_pruning": false,
+            "no_layerwise": true
+        },
+        "conversions": [
+            {
+                "op": "prune",
+                "sparsity": 0.5,
+                "callback": "MagnitudePruningCallback",
+                "weight_layers": [
+                    "Conv2d",
+                    "ConvTranspose2d"
+                ],
+                "excluded_weight_layer_indexes": [
+                    [
+                        "Conv2d",
+                        [
+                            -1
+                        ]
+                    ]
+                ],
+                "structure": true
+            }
+        ],
+        "apoz": ""
+    }
+}
