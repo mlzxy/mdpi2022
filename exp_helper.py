@@ -89,7 +89,7 @@ def convert(net, _op=None):
     else:
         qsparse_params = Config.qsparse_params
         conversion_params = qsparse_params["conversions"]
-    
+
     apoz = {}
     if "apoz" in qsparse_params and qsparse_params["apoz"]:
         with open(qsparse_params["apoz"]) as f:
@@ -158,9 +158,9 @@ def convert(net, _op=None):
             if 'conv2d' == layer_type or 'convtranspose2d' == layer_type or 'linear' ==layer_type:
                 return ln
             ind -= 1
-        raise RuntimeError()        
+        raise RuntimeError()
 
-    
+
     def find_next_bn(layer_name, parent_op=None):
         ind = all_layer_names.index(layer_name)
         for i in range(ind+1, len(all_layer_names)):
@@ -179,13 +179,13 @@ def convert(net, _op=None):
     just_a_players = [mod for mod in net.modules() if isinstance(mod, PruneLayer) and not mod.name.endswith("prune")]
     a_w_players = [mod for mod in net.modules() if isinstance(mod, PruneLayer)]
     q_players = [mod for mod in net.modules() if isinstance(mod, QuantizeLayer)]
-    players = a_w_players 
+    players = a_w_players
     if "gradual_pruning" in qsparse_params:
         param = qsparse_params["gradual_pruning"]
         is_weight_prune = all([p.name.endswith('.prune') for p in players])
 
         non_layerwise = param.get("no_layerwise", False)
-        
+
         mask_refresh_interval = to_step(param["mask_refresh_interval"])
         print(f"============ Gradual Pruning (Mask Refresh Every {mask_refresh_interval}) ============")
         if param.get("from", "top") == "bottom":
@@ -193,7 +193,7 @@ def convert(net, _op=None):
 
         if param.get("from", "top") == "shuffle":
             random.shuffle(players)
-        
+
         start = to_step(param["start"]) * param.get("interval_multiplier", 1) #// 10 # TODO
         interval = to_step(param["interval"]) * param.get("interval_multiplier", 1) #// 4 # TODO
         logging.danger(f"start: {start}, interval: {interval}")
@@ -215,7 +215,7 @@ def convert(net, _op=None):
                 l.callback.running_average = False
             start += (interval + 1)
             # logging.danger(f'{l.name} -> start: {l.start}')
-        
+
         if is_true(param, "layer_pq"):
             logging.danger("configuring layerwise p+q")
             pq_dict = defaultdict(lambda: {
@@ -266,7 +266,7 @@ def convert(net, _op=None):
         layer_types[l.name] =  _
         logging.warning(f"{l.name} = {_}")
 
-        
+
     # time.sleep(5)
     return net
 
@@ -275,26 +275,5 @@ _global_ = {}
 
 
 def epoch_callback(net, epoch):
-    from qsparse.sparse import PruneLayer
-    qsparse_params = Config.qsparse_params
-    if "gradual_pruning" in Config.qsparse_params:
-        if is_true(Config.qsparse_params["gradual_pruning"], "freeze_during_pruning") and not is_true(Config.qsparse_params["gradual_pruning"], "no_layerwise"):
-            if epoch >= Config.pruning_finished_epoch:
-                if "unfreeze_warning" not in _global_:
-                    _global_["unfreeze_warning"] = True
-                    logging.warning("unfreeze the network")
-                net.train()
-            else:
-                if "freeze_warning" not in _global_:
-                    _global_["freeze_warning"] = True
-                    logging.warning("freezing the network")
-                net = net.eval() 
-                for mod in net.modules():
-                    if isinstance(mod, PruneLayer):
-                        mod.train()
-        else:
-            net.train()
-    else:
-        net.train()
-        
+    net.train()
     return net
