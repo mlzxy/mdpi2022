@@ -321,28 +321,27 @@ class LineQuantization(torch.autograd.Function):
             step[step == 0] = 0.0001
             # qa = torch.clamp(((x - start) / step).round(), 0, N - 1) * step + start
 
-            # if  not training:
-            #     # print('Z_INT')
-            #     qa = (x / step).round()
-            #     qstart = (start / step).round()
-            #     qa = (qa - qstart).clamp(0, N-1)
-            #     qa = (qa + qstart) * step
-            #     return qa
-            # else:
-            if inplace:
-                x = x - start
-                x /= step
-                x = x.round_().clamp_(0, N - 1)
-                x = x * step
-                x += start
-                return x
-            else:
-                qa = x - start
-                qa /= step
-                qa = qa.round_().clamp_(0, N - 1)
-                qa = qa * step
-                qa += start
+            if  not training:
+                qa = (x / step).round()
+                qstart = (start / step).round()
+                qa = (qa - qstart).clamp(0, N-1)
+                qa = (qa + qstart) * step
                 return qa
+            else:
+                if inplace:
+                    x = x - start
+                    x /= step
+                    x = x.round_().clamp_(0, N - 1)
+                    x = x * step
+                    x += start
+                    return x
+                else:
+                    qa = x - start
+                    qa /= step
+                    qa = qa.round_().clamp_(0, N - 1)
+                    qa = qa * step
+                    qa += start
+                    return qa
 
     @staticmethod
     def backward(ctx, grad_output):
