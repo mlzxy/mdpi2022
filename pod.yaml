@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-name
+spec:
+  containers:
+  - name: gpu-container
+    image: gitlab-registry.nrp-nautilus.io/zxy/mydocker:latest
+    command: [ "/bin/bash", "-c" ]
+    args:
+      -   echo "sleeping infinitely...";
+          sleep infinity
+    resources:
+      limits:
+        nvidia.com/gpu: 1
+        memory: "12Gi"
+    volumeMounts:
+    - mountPath: /dataset/
+      name: zxy-volume-ceph-dataset
+    - mountPath: /dev/shm
+      name: dshm
+
+  restartPolicy: Never
+  volumes:
+    - name: zxy-volume-ceph-dataset
+      persistentVolumeClaim:
+        claimName: zxy-volume-ceph-dataset  
+    - name: dshm
+      emptyDir:
+        medium: Memory

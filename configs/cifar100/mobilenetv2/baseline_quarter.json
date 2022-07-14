@@ -1,0 +1,10 @@
+{
+    "name": "cifar100/mobilenetv2/baseline_quarter",
+    "task_parameters": {
+        "gpu": true,
+        "net": "mobilenetv2-quarter",
+        "warm": 2
+    },
+    "$checkpoint_path": "CHECKPOINT_PATH",
+    "qsparse_parameters": []
+}

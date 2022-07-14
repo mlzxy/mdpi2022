@@ -1,0 +1,15 @@
+dominate
+protobuf==3.20.1
+tensorboardX
+numpy    
+tqdm     
+jstyleson 
+pytorch-gan-metrics 
+imageio  
+opencv-python 
+scikit-learn
+absl-py
+torch 
+torchvision 
+torchaudio
+scipy==1.1.0

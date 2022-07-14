@@ -1,0 +1,10 @@
+{
+    "name": "cifar100/densenet121/baseline",
+    "task_parameters": {
+        "gpu": true,
+        "net": "densenet121",
+        "warm": 2
+    },
+    "$checkpoint_path": "CHECKPOINT_PATH",
+    "qsparse_parameters": []
+}

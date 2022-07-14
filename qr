@@ -1,14 +1,16 @@
 #!/usr/bin/python3.8
+import os.path as osp
 import sys
 
 if __name__ == "__main__":
     cmd = sys.argv[1].strip()
+    dirname = osp.dirname(osp.abspath(__file__))
     if cmd.startswith("citys/"):
-        script = './segmentation/train.py'
+        script = 'segmentation/train.py'
     elif cmd.startswith("cifar100"):
-        script = "./classification/train.py"
+        script = "classification/train.py"
     elif cmd.startswith("citysgan"):
-        script = "./style_transfer/train.py"
+        script = "style_transfer/train.py"
     else:
         raise RuntimeError("Unknown command")
-    print(f"bash ./exp_runner.sh {script} ./configs/{cmd}")
+    print(f"bash {osp.join(dirname, 'exp_runner.sh')} {osp.join(dirname, script)} {osp.join(dirname, 'configs', cmd)}")

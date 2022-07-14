@@ -8,6 +8,7 @@ author baiyu
 
 import os
 import sys
+import os.path as osp
 import argparse
 import time
 from datetime import datetime
@@ -72,7 +73,7 @@ def train(epoch):
         ))
 
         #update training loss for each iteration
-        writer.add_scalar('Train/loss', loss.item(), n_iter)
+        # writer.add_scalar('Train/loss', loss.item(), n_iter)
 
         if epoch <= args.warm:
             warmup_scheduler.step()
@@ -122,14 +123,13 @@ def eval_training(epoch=0, tb=True):
     print()
 
     #add informations to tensorboard
-    if tb:
-        writer.add_scalar('Test/Average loss', test_loss / len(cifar100_test_loader.dataset), epoch)
-        writer.add_scalar('Test/Accuracy', correct.float() / len(cifar100_test_loader.dataset), epoch)
+    # if tb:
+    #     writer.add_scalar('Test/Average loss', test_loss / len(cifar100_test_loader.dataset), epoch)
+    #     writer.add_scalar('Test/Accuracy', correct.float() / len(cifar100_test_loader.dataset), epoch)
 
     return correct.float() / len(cifar100_test_loader.dataset)
 
 if __name__ == '__main__':
-
     parser = argparse.ArgumentParser()
     parser.add_argument('-net', type=str, default='vgg', help='net type')
     parser.add_argument('-gpu', action='store_true', default=False, help='use gpu or not')
@@ -190,12 +190,12 @@ if __name__ == '__main__':
 
     #since tensorboard can't overwrite old values
     #so the only way is to create a new tensorboard log
-    writer = SummaryWriter(log_dir=os.path.join(
-            settings.LOG_DIR, args.net, settings.TIME_NOW))
+    # writer = SummaryWriter(log_dir=os.path.join(
+    #         settings.LOG_DIR, args.net, settings.TIME_NOW))
     input_tensor = torch.Tensor(1, 3, 32, 32)
     if args.gpu:
         input_tensor = input_tensor.cuda()
-    writer.add_graph(net, input_tensor)
+    # writer.add_graph(net, input_tensor)
 
     #create checkpoint folder to save model
     if not os.path.exists(checkpoint_path):
@@ -225,6 +225,7 @@ if __name__ == '__main__':
                     n._n_updates.data[:] = 0
 
 
+    os.chdir(osp.join(osp.dirname(__file__), ".."))
     if args.resume and not args.resume_after_convert:
         load_pretrain()
 
@@ -277,7 +278,7 @@ if __name__ == '__main__':
             if not args.no_save:
                 torch.save(net.state_dict(), weights_path)
 
-    writer.close()
+    # writer.close()
 
     acc_valid_records = sorted(acc_valid_records, reverse=True)[:1]
     print(acc_valid_records)

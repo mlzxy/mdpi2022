@@ -155,3 +155,5 @@ runs
 checkpoints
 images
 checkpoints*
+additional_checkpoints*
+dataset.tar*

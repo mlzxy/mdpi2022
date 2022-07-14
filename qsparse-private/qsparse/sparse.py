@@ -15,185 +15,185 @@ from matplotlib import use
 from qsparse.common import PruneCallback
 from qsparse.imitation import imitate
 from qsparse.util import align_tensor_to_shape, get_option, logging, nd_slice
-import numba
+# import numba
 
 
 id2mask = {}
 
 
-@numba.jit(nopython=True, parallel=True)
-def my_conv2d(inp_up, out_shape, weight, padding=1, stride=1, groups=1, **kwargs):
-    if isinstance(padding, int):
-        padding = (padding, padding)
+# @numba.jit(nopython=True, parallel=True)
+# def my_conv2d(inp_up, out_shape, weight, padding=1, stride=1, groups=1, **kwargs):
+#     if isinstance(padding, int):
+#         padding = (padding, padding)
 
-    if isinstance(stride, int):
-        stride = (stride, stride)
+#     if isinstance(stride, int):
+#         stride = (stride, stride)
 
-    in_shape = inp_up.shape
-    inp = np.zeros((1, in_shape[1], in_shape[2]
-                   + 2 * padding[0], in_shape[3] + 2 * padding[1]))
-    if padding[0] == 0:
-        inp = inp_up
-    else:
-        inp[:, :, padding[0]:-padding[0], padding[1]:-padding[1]] = inp_up
+#     in_shape = inp_up.shape
+#     inp = np.zeros((1, in_shape[1], in_shape[2]
+#                    + 2 * padding[0], in_shape[3] + 2 * padding[1]))
+#     if padding[0] == 0:
+#         inp = inp_up
+#     else:
+#         inp[:, :, padding[0]:-padding[0], padding[1]:-padding[1]] = inp_up
 
-    out = np.zeros(out_shape)
+#     out = np.zeros(out_shape)
 
-    group_size = inp.shape[1] // groups
-    out_group_size = out.shape[1] // groups
+#     group_size = inp.shape[1] // groups
+#     out_group_size = out.shape[1] // groups
 
-    ks_h = weight.shape[2]
-    ks_w = weight.shape[3]
+#     ks_h = weight.shape[2]
+#     ks_w = weight.shape[3]
 
-    for co in numba.prange(out_group_size):
-        for gi in range(groups):
-            for ci in range(group_size):
-                for i in range(out.shape[2]):
-                    for j in range(out.shape[3]):
-                        center_h = i * stride[0]
-                        center_w = j * stride[1]
-                        tmp = (inp[0, gi * group_size + ci, center_h:center_h + ks_h,
-                               center_w:center_w + ks_w] * weight[gi * out_group_size + co, ci, :, :]).sum()
-                        out[0, gi * out_group_size + co, i, j] += tmp
-    return out
-
-
-@numba.jit(nopython=True)
-def my_deconv2d(inp, out_shape, weight, padding=0, stride=1, output_padding=0, **kwargs):
-    if isinstance(padding, int):
-        padding = (padding, padding)
-
-    if isinstance(output_padding, int):
-        output_padding = (output_padding, output_padding)
-
-    if isinstance(stride, int):
-        stride = (stride, stride)
-
-    assert padding == output_padding
-
-    in_shape = inp.shape
-    unpadded_output = np.zeros(
-        (out_shape[0], out_shape[1], out_shape[2] + padding[0] * 2, out_shape[3] + padding[1] * 2))
-    # print(unpadded_output.shape)
-    ks_h = weight.shape[2]
-    ks_w = weight.shape[3]
-
-    for co in range(out_shape[1]):
-        for ci in range(inp.shape[1]):
-            for i in range(inp.shape[2]):
-                for j in range(inp.shape[3]):
-                    center_h = i * stride[0]
-                    center_w = j * stride[1]
-                    unpadded_output[0, co, center_h:center_h + ks_h, center_w:center_w + ks_w] += (
-                        inp[0, ci, i, j] * weight[ci, co, :, :])
-
-    if padding[0] > 0 and padding[1] > 0:
-        return unpadded_output[:, :, padding[0]:-padding[0], padding[1]:-padding[1]]
-    elif padding[0] > 0:
-        return unpadded_output[:, :, padding[0]:-padding[0], :]
-    elif padding[1] > 0:
-        return unpadded_output[:, :, :, padding[1]:-padding[1]]
-    else:
-        return unpadded_output
+#     for co in numba.prange(out_group_size):
+#         for gi in range(groups):
+#             for ci in range(group_size):
+#                 for i in range(out.shape[2]):
+#                     for j in range(out.shape[3]):
+#                         center_h = i * stride[0]
+#                         center_w = j * stride[1]
+#                         tmp = (inp[0, gi * group_size + ci, center_h:center_h + ks_h,
+#                                center_w:center_w + ks_w] * weight[gi * out_group_size + co, ci, :, :]).sum()
+#                         out[0, gi * out_group_size + co, i, j] += tmp
+#     return out
 
 
-@numba.jit(nopython=True)
-def my_deconv2d_trace(inp_m, out_m, weight_shape, padding=0, stride=2, output_padding=0, **kwargs):
-    if isinstance(padding, int):
-        padding = (padding, padding)
+# @numba.jit(nopython=True)
+# def my_deconv2d(inp, out_shape, weight, padding=0, stride=1, output_padding=0, **kwargs):
+#     if isinstance(padding, int):
+#         padding = (padding, padding)
 
-    if isinstance(output_padding, int):
-        output_padding = (output_padding, output_padding)
+#     if isinstance(output_padding, int):
+#         output_padding = (output_padding, output_padding)
 
-    if isinstance(stride, int):
-        stride = (stride, stride)
+#     if isinstance(stride, int):
+#         stride = (stride, stride)
 
-    # assert padding == output_padding
-    out_shape = out_m.shape
-    unpadded_out_m = np.zeros(
-        (out_shape[0], out_shape[1], out_shape[2] + padding[0] * 2, out_shape[3] + padding[1] * 2), dtype='bool')
-    if padding[0] > 0 and padding[1] > 0:
-        unpadded_out_m[:, :, padding[0]:-padding[0],
-                       padding[1]:-padding[1]] = out_m
-    elif padding[0] > 0:
-        unpadded_out_m[:, :, padding[0]:-padding[0], :] = out_m
-    elif padding[1] > 0:
-        unpadded_out_m[:, :, :, padding[1]:-padding[1]] = out_m
-    else:
-        unpadded_out_m = out_m
+#     assert padding == output_padding
 
-    weight = np.zeros((weight_shape[0], weight_shape[1]))  # ci, co
-    in_shape = inp_m.shape
-    ks_h = weight_shape[2]
-    ks_w = weight_shape[3]
+#     in_shape = inp.shape
+#     unpadded_output = np.zeros(
+#         (out_shape[0], out_shape[1], out_shape[2] + padding[0] * 2, out_shape[3] + padding[1] * 2))
+#     # print(unpadded_output.shape)
+#     ks_h = weight.shape[2]
+#     ks_w = weight.shape[3]
 
-    tasks = []
-    for co in range(out_shape[1]):
-        for ci in range(in_shape[1]):
-            tasks.append((co, ci))
+#     for co in range(out_shape[1]):
+#         for ci in range(inp.shape[1]):
+#             for i in range(inp.shape[2]):
+#                 for j in range(inp.shape[3]):
+#                     center_h = i * stride[0]
+#                     center_w = j * stride[1]
+#                     unpadded_output[0, co, center_h:center_h + ks_h, center_w:center_w + ks_w] += (
+#                         inp[0, ci, i, j] * weight[ci, co, :, :])
 
-    for ind in range(len(tasks)):
-        co, ci = tasks[ind]
-        tmp = 0
-        for i in range(in_shape[2]):
-            for j in range(in_shape[3]):
-                if inp_m[0, ci, i, j] == 0:
-                    continue
-                else:
-                    center_h = i * stride[0]
-                    center_w = j * stride[1]
-                    tmp += unpadded_out_m[0, co, center_h:center_h
-                                          + ks_h, center_w:center_w + ks_w].sum()
-        weight[ci, co] += tmp
-    return weight
+#     if padding[0] > 0 and padding[1] > 0:
+#         return unpadded_output[:, :, padding[0]:-padding[0], padding[1]:-padding[1]]
+#     elif padding[0] > 0:
+#         return unpadded_output[:, :, padding[0]:-padding[0], :]
+#     elif padding[1] > 0:
+#         return unpadded_output[:, :, :, padding[1]:-padding[1]]
+#     else:
+#         return unpadded_output
 
 
-@numba.jit(nopython=True, parallel=True)
-def my_conv2d_trace(inp_m, out_m, weight_shape, padding=(1, 1), stride=(1, 1), groups=1, **kwargs):
+# @numba.jit(nopython=True)
+# def my_deconv2d_trace(inp_m, out_m, weight_shape, padding=0, stride=2, output_padding=0, **kwargs):
+#     if isinstance(padding, int):
+#         padding = (padding, padding)
 
-    if isinstance(padding, int):
-        padding = (padding, padding)
-    if isinstance(stride, int):
-        stride = (stride, stride)
+#     if isinstance(output_padding, int):
+#         output_padding = (output_padding, output_padding)
 
-    in_shape = inp_m.shape
-    inp = np.zeros((1, in_shape[1], in_shape[2]
-                   + 2 * padding[0], in_shape[3] + 2 * padding[1]))
-    if padding[0] == 0:
-        inp[:] = inp_m
-    else:
-        inp[:, :, padding[0]:-padding[0], padding[1]:-padding[1]] = inp_m
-    # inp[:, :, padding[0]:-padding[0], padding[1]:-padding[1]] = inp_m
-    out = out_m
-    weight = np.zeros((weight_shape[0], weight_shape[1]))
+#     if isinstance(stride, int):
+#         stride = (stride, stride)
 
-    group_size = inp.shape[1] // groups
-    out_group_size = out.shape[1] // groups
+#     # assert padding == output_padding
+#     out_shape = out_m.shape
+#     unpadded_out_m = np.zeros(
+#         (out_shape[0], out_shape[1], out_shape[2] + padding[0] * 2, out_shape[3] + padding[1] * 2), dtype='bool')
+#     if padding[0] > 0 and padding[1] > 0:
+#         unpadded_out_m[:, :, padding[0]:-padding[0],
+#                        padding[1]:-padding[1]] = out_m
+#     elif padding[0] > 0:
+#         unpadded_out_m[:, :, padding[0]:-padding[0], :] = out_m
+#     elif padding[1] > 0:
+#         unpadded_out_m[:, :, :, padding[1]:-padding[1]] = out_m
+#     else:
+#         unpadded_out_m = out_m
 
-    ks_h = weight_shape[2]
-    ks_w = weight_shape[3]
+#     weight = np.zeros((weight_shape[0], weight_shape[1]))  # ci, co
+#     in_shape = inp_m.shape
+#     ks_h = weight_shape[2]
+#     ks_w = weight_shape[3]
 
-    tasks = []
-    for co in range(out_group_size):
-        for gi in range(groups):
-            for ci in range(group_size):  # group_size
-                tasks.append((co, gi, ci))
+#     tasks = []
+#     for co in range(out_shape[1]):
+#         for ci in range(in_shape[1]):
+#             tasks.append((co, ci))
 
-    for ind in numba.prange(len(tasks)):
-        co, gi, ci = tasks[ind]
-        tmp = 0
-        o_c_ind = gi * out_group_size + co
-        i_c_ind = gi * group_size + ci
-        for i in range(out.shape[2]):
-            for j in range(out.shape[3]):
-                center_h = i * stride[0]
-                center_w = j * stride[1]
-                if out[0, o_c_ind, i, j] == 0:
-                    continue
-                tmp += inp[0, i_c_ind, center_h:center_h
-                           + ks_h, center_w:center_w + ks_w].sum()
-        weight[o_c_ind, ci] += tmp
-    return weight
+#     for ind in range(len(tasks)):
+#         co, ci = tasks[ind]
+#         tmp = 0
+#         for i in range(in_shape[2]):
+#             for j in range(in_shape[3]):
+#                 if inp_m[0, ci, i, j] == 0:
+#                     continue
+#                 else:
+#                     center_h = i * stride[0]
+#                     center_w = j * stride[1]
+#                     tmp += unpadded_out_m[0, co, center_h:center_h
+#                                           + ks_h, center_w:center_w + ks_w].sum()
+#         weight[ci, co] += tmp
+#     return weight
+
+
+# @numba.jit(nopython=True, parallel=True)
+# def my_conv2d_trace(inp_m, out_m, weight_shape, padding=(1, 1), stride=(1, 1), groups=1, **kwargs):
+
+#     if isinstance(padding, int):
+#         padding = (padding, padding)
+#     if isinstance(stride, int):
+#         stride = (stride, stride)
+
+#     in_shape = inp_m.shape
+#     inp = np.zeros((1, in_shape[1], in_shape[2]
+#                    + 2 * padding[0], in_shape[3] + 2 * padding[1]))
+#     if padding[0] == 0:
+#         inp[:] = inp_m
+#     else:
+#         inp[:, :, padding[0]:-padding[0], padding[1]:-padding[1]] = inp_m
+#     # inp[:, :, padding[0]:-padding[0], padding[1]:-padding[1]] = inp_m
+#     out = out_m
+#     weight = np.zeros((weight_shape[0], weight_shape[1]))
+
+#     group_size = inp.shape[1] // groups
+#     out_group_size = out.shape[1] // groups
+
+#     ks_h = weight_shape[2]
+#     ks_w = weight_shape[3]
+
+#     tasks = []
+#     for co in range(out_group_size):
+#         for gi in range(groups):
+#             for ci in range(group_size):  # group_size
+#                 tasks.append((co, gi, ci))
+
+#     for ind in numba.prange(len(tasks)):
+#         co, gi, ci = tasks[ind]
+#         tmp = 0
+#         o_c_ind = gi * out_group_size + co
+#         i_c_ind = gi * group_size + ci
+#         for i in range(out.shape[2]):
+#             for j in range(out.shape[3]):
+#                 center_h = i * stride[0]
+#                 center_w = j * stride[1]
+#                 if out[0, o_c_ind, i, j] == 0:
+#                     continue
+#                 tmp += inp[0, i_c_ind, center_h:center_h
+#                            + ks_h, center_w:center_w + ks_w].sum()
+#         weight[o_c_ind, ci] += tmp
+#     return weight
 
 
 def calculate_weight_mag(input_mask, output_mask, weight_shape, op_name, op_kwargs):

@@ -19,6 +19,8 @@ See training and test tips at: https://github.com/junyanz/pytorch-CycleGAN-and-p
 See frequently asked questions at: https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix/blob/master/docs/qa.md
 """
 import time
+import os
+import os.path as osp
 from options.train_options import TrainOptions
 from data import create_dataset
 from data.unaligned_dataset import UnalignedDataset
@@ -62,6 +64,7 @@ def create_test_loader(parent):
 
 
 if __name__ == '__main__':
+    os.chdir(osp.join(osp.dirname(__file__), ".."))
     _ = TrainOptions()   # get training options
     opt = _.parse()
     # ================================================

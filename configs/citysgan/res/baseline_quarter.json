@@ -1,0 +1,26 @@
+{
+    "name": "citysgan/res/baseline_quarter",
+    "task_parameters": {
+        "size": 0.25,
+
+        "direction": "BtoA",
+        "netG": "resnet_6blocks",
+        "dataroot": "/home/jovyan/cyclegan/",
+        "name": "cityscape_cyclegan",
+        "pool_size": 50,
+        "no_dropout": true,
+        "n_epochs": 100,
+        "n_epochs_decay": 100,
+        "lr": 0.0002,
+        "load_size": 143,
+        "crop_size": 128,
+        "save_latest_freq": 15000,
+        "save_epoch_freq": 10,
+        "display_freq": 4000,
+        "fid_cache": "/home/jovyan/cyclegan/fid_stat.A.npz",
+        "record_after": 5
+    },
+    "$checkpoint_path": "checkpoints_dir",
+    "qsparse_parameters": []
+}
+

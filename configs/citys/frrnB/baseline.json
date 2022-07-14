@@ -1,0 +1,50 @@
+{
+    "name": "citys/frrnB/baseline",
+    "task_parameters": {
+        "model": {
+            "arch": "frrnB",
+            "size": 1.0
+        },
+        "data": {
+            "dataset": "cityscapes",
+            "train_split": "train",
+            "val_split": "val",
+            "img_rows": 256,
+            "img_cols": 512,
+            "path": "/home/jovyan/Cityscapes"
+        },
+        "training": {
+            "loss": {
+                "name": "bootstrapped_cross_entropy",
+                "K": 32768
+            },
+            "n_workers": 10,
+            "train_iters": 45000,
+            "batch_size": 3,
+            "val_interval": 2500,
+            "print_interval": 25,
+            "optimizer": {
+                "name": "adam",
+                "lr": 0.001
+            },
+            "lr_schedule": {
+                "name": "multi_step",
+                "gamma": 0.1,
+                "milestones": [
+                    35000
+                ]
+            },
+            "augmentations": {
+                "translate": [
+                    64,
+                    128
+                ],
+                "gamma": 0.75
+            },
+            "resume": null
+        },
+        "record_after": 1000
+    },
+    "$checkpoint_path": "checkpoint",
+    "qsparse_parameters": []
+}

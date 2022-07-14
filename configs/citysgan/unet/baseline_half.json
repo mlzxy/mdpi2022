@@ -1,0 +1,31 @@
+{
+    "name": "citysgan/unet/baseline_half",
+    "task_parameters": {
+        "size": 0.5,
+        "direction": "BtoA",
+        "netG": "unet_256", 
+        "dataroot": "/home/jovyan/Cityscapes_pix2pix/cityscapes",
+        "batch_size": 3,
+        "name": "cityscapes_pix2pix",
+        "pool_size": 0,
+        "gan_mode": "vanilla",
+        "dataset_mode": "aligned",
+        "model": "pix2pix",
+        "no_dropout": true,
+        "n_epochs": 100,
+        "n_epochs_decay": 100,
+        "lr": 0.0002,
+        "lambda_L1": 100,
+        "load_size": 286,
+        "crop_size": 256,
+        "norm": "batch",
+        "save_latest_freq": 15000,
+        "save_epoch_freq": 10,
+        "display_freq": 4000,
+        "fid_cache": "/home/jovyan/Cityscapes_pix2pix/fid_stat.A.256.npz",
+        "record_after": 5
+    },
+    "$checkpoint_path": "checkpoints_dir",
+    "qsparse_parameters": []
+}
+

@@ -6,6 +6,7 @@ import torch
 import random
 import argparse
 import numpy as np
+import os.path as osp
 
 from torch.utils import data
 from tqdm import tqdm
@@ -269,6 +270,7 @@ class AttrDict(dict):
 
 
 if __name__ == "__main__":
+    os.chdir(osp.join(osp.dirname(__file__), ".."))
     cfg = AttrDict()
 
     ##############################################################################
