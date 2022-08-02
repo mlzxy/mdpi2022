@@ -69,6 +69,7 @@ def init(args=None):
 def set_epoch_size(loader): Config.epoch_size = loader if isinstance(loader, int) else len(loader)
 
 
+
 def convert(net):
     import qsparse, time, math
     from qsparse import quantize, prune
@@ -78,7 +79,8 @@ def convert(net):
     import random
     from qsparse.util import logging
 
-    use_public_qsparse = "qsparse-private" not in qsparse.__path__
+    use_public_qsparse = "qsparse-private" not in qsparse.__path__[0]
+
 
     def to_step(x): return int(round(Config.epoch_size * x)) if x > 0 else (1 if x == 0 else -1)
     def layer_names_to_modules(names): return [getattr(nn, layer_name) for layer_name in names]
@@ -92,6 +94,7 @@ def convert(net):
         conversion_params = qsparse_params["conversions"]
 
     if use_public_qsparse:
+        qsparse.AdaptiveLineQuantizer = qsparse.AdaptiveQuantizer 
         from qsparse.sparse import devise_layerwise_pruning_schedule 
         print(f"Using qsparse from {qsparse.__path__}")
         for param in conversion_params:
@@ -110,7 +113,6 @@ def convert(net):
                     excluded_activation_layer_indexes=layer_names_to_modules_2rd(param.get("excluded_activation_layer_indexes", [])),
                     excluded_weight_layer_indexes=layer_names_to_modules_2rd(param.get("excluded_weight_layer_indexes", [])), 
                     include=param.get("filter", []), exclude=param.get("exclude", None), input=param.get("input", False), order=param.get('order', 'post'))
-
         print(str(net))
         param = qsparse_params["gradual_pruning"]
         start = to_step(param["start"])
