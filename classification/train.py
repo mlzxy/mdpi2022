@@ -142,7 +142,7 @@ if __name__ == '__main__':
     parser.add_argument("--no_save", default=False, action='store_true')
     parser.add_argument("--use_cifar10", default=False, action='store_true')
     args = parser.parse_args()
-    
+
     ##############################################################################
     from exp_helper import init
     init([settings, args])
@@ -219,10 +219,6 @@ if __name__ == '__main__':
         fix_shapes(net, state_dict) # test _t
         net.load_state_dict(state_dict)
 
-        for n in net.modules():
-            if n.__class__.__name__ == "PruneLayer":
-                if n.callback.preserve_existing_mask:
-                    n._n_updates.data[:] = 0
 
 
     os.chdir(osp.join(osp.dirname(__file__), ".."))
@@ -240,7 +236,7 @@ if __name__ == '__main__':
         load_pretrain()
     ##############################################################################
 
-        
+
 
     acc_valid_records = []
 

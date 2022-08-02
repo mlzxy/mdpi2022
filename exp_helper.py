@@ -101,7 +101,7 @@ def convert(net):
             print(f'***** Convert net with {param} *****')
             net = qsparse.convert(net, 
             quantize(bits=param["bits"], channelwise=param["channelwise"], 
-                    timeout=to_step(param["timeout"]), callback=getattr(qsparse, param["callback"])) 
+                    timeout=to_step(param["timeout"]), callback=getattr(qsparse, param["callback"])()) 
                     if param["op"] == "quantize" else 
                     prune(sparsity=param["sparsity"], start=to_step(param.get("start", 0)),
                         interval=to_step(param.get("interval", 0)), rampup=param.get("rampup", False),
