@@ -1,0 +1,4 @@
+[submodule "qsparse-public"]
+	path = qsparse-public
+	url = https://github.com/mlzxy/qsparse
+	branch = mdpi-final
