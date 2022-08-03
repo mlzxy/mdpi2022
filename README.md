@@ -6,7 +6,8 @@ This repo contains source code for the experiments reported in the MDPI submissi
 - Semantic Segmentation on Cityscape: folder [segmentation](segmentation/), based on [meetps/pytorch-semseg](https://github.com/meetps/pytorch-semseg) and [milesial/Pytorch-UNet](https://github.com/milesial/Pytorch-UNet)
 - Image Style Transfer on Cityscape: folder [style_transfer](style_transfer/), based on [junyanz/pytorch-CycleGAN-and-pix2pix](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix).
 
-To keep the code changes on each task minimal, we centralize the network conversion logic in a utility file called [exp_helper.py](exp_helper.py), which is imported by all the experiments. An example of using `exp_helper.py` can be found in [classification/train.py#L232](classification/train.py#L232). There is a customized version of [qsparse](https://github.com/mlzxy/qsparse) residing in the folder [qsparse-private](qsparse-private/), in which we build the core functionalities of pruning and quantization modules and network traversal. The implementation of pruning and quantization module can be found in [qsparse-private/qsparse/sparse.py](qsparse-private/qsparse/sparse.py) and [qsparse-private/qsparse/quantize.py](qsparse-private/qsparse/quantize.py), respectively.
+To keep the code changes on each task minimal, we centralize the network conversion logic in a utility file called [exp_helper.py](exp_helper.py), which is imported by all the experiments. An example of using `exp_helper.py` can be found in [classification/train.py#L232](classification/train.py#L232). There is a customized version of [qsparse](https://github.com/mlzxy/qsparse) residing in the folder [qsparse-private](qsparse-private/), in which we build the core functionalities of pruning and quantization modules and network traversal. The implementation of pruning and quantization module can be found in [qsparse-private/qsparse/sparse.py](qsparse-private/qsparse/sparse.py) and [qsparse-private/qsparse/quantize.py](qsparse-private/qsparse/quantize.py), respectively. We also provide a refactored implementation in the original repo [qsparse](https://github.com/mlzxy/qsparse), which is submoduled at [qsparse-public](qsparse-public/). This version can be installed from [pypi](https://pypi.org/project/qsparse/) and has a much cleaner codebase. Further instructions on how to run experiments with [qsparse-public](qsparse-public/) are provided in the latter of this README. 
+
 
 Each experiment is defined by a configuration JSON file. Examples can be found in the [configs](configs/) folder. The workflow of running an experiment is:
 
@@ -63,3 +64,27 @@ Each task has its own prefix:
 * Style Transfer at Cityscape
   * CycleGAN: `citysgan/res`
 
+
+### Run experiments with public version of qsparse
+
+You can install qsparse by `pip install qsparse`, or pull it as a submodule through:
+
+```bash
+git submodule init
+git submodule update
+```
+
+Then, prepend the `USE_PUBLIC_QSPARSE=1` to the above commands. For example,
+
+```bash
+USE_PUBLIC_QSPARSE=1 ./qr.sh cifar100/mobilenetv2/a75_mag_top_loc_st
+```
+
+Note that the public qsparse library is not compatible with the one-shot learning configuration, e.g.,`75_mag_top_loc_st_nly`, and will yield different results on weight pruning experiments because [qsparse-private](qsparse-private/) supports resetting bias and batchnorm parameters of pruned channels to zero ([code](qsparse-private/qsparse/sparse.py#L515)), in order to align the behavior of weight and activation pruning, while the public version does not. The results in our publication are based on the private version.
+
+
+<!-- 
+
+add citation bibtex
+
+ -->
