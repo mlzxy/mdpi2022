@@ -20,7 +20,7 @@ Each experiment is defined by a configuration JSON file. Examples can be found i
 
 1. Build or download the docker image from [gitlab.nrp-nautilus.io/zxy/mydocker](https://gitlab.nrp-nautilus.io/zxy/mydocker), which installs all the required dependencies that the codebase relies on.
 2. Download the pretrained checkpoints from [https://drive.google.com/file/d/1UsfIXqBhtrGad3NzGzSVwQwUoWawCRks/view?usp=sharing](https://drive.google.com/file/d/1UsfIXqBhtrGad3NzGzSVwQwUoWawCRks/view?usp=sharing). Extract it into the project root, you will get a `checkpoints` folder.  (More checkpoints can be found here [https://drive.google.com/file/d/1hgHUMxVyAaNbn_gbi6rBZq_7dKo2n1_b/view?usp=sharing](https://drive.google.com/file/d/1hgHUMxVyAaNbn_gbi6rBZq_7dKo2n1_b/view?usp=sharing))
-3. Download the dataset file from [https://drive.google.com/file/d/1UsfIXqBhtrGad3NzGzSVwQwUoWawCRks/view?usp=sharing](https://drive.google.com/file/d/1UsfIXqBhtrGad3NzGzSVwQwUoWawCRks/view?usp=sharing), which contains a copy of cifar100 and cityscape datasets. Extract it into your `${HOME}`, for Cityscape dataset used for segmentation training, run `decompress.sh` script located in `~/Cityscapes` after extraction.
+3. Download the dataset file from https://drive.google.com/file/d/1Y7PduznYNic-OfbMbIrc48VIB6sDnZ8N/view?usp=sharing, which contains a copy of cifar100 and cityscape datasets. Extract it into your `${HOME}`, for Cityscape dataset used for segmentation training, run `decompress.sh` script located in `~/Cityscapes` after extraction.
 
 ## Command to run experiments
 
