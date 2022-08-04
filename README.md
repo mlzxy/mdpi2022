@@ -80,7 +80,7 @@ Then, prepend the `USE_PUBLIC_QSPARSE=1` to the above commands. For example,
 USE_PUBLIC_QSPARSE=1 ./qr.sh cifar100/mobilenetv2/a75_mag_top_loc_st
 ```
 
-Note that the public qsparse library is not compatible with the one-shot learning configuration, e.g.,`75_mag_top_loc_st_nly`, and will yield different results on weight pruning experiments because [qsparse-private](qsparse-private/) supports resetting bias and batchnorm parameters of pruned channels to zero ([code](qsparse-private/qsparse/sparse.py#L515)), in order to align the behavior of weight and activation pruning, while the public version does not. The results in our publication are based on the private version.
+Note that the public qsparse library is not compatible with the one-shot pruning configuration, e.g.,`75_mag_top_loc_st_nly`, and will yield different results on weight pruning experiments because [qsparse-private](qsparse-private/) supports resetting bias and batchnorm parameters of pruned channels to zero ([code](qsparse-private/qsparse/sparse.py#L515)), in order to align the behavior of weight and activation pruning, while the public version does not. The results in our publication are based on the private version.
 
 
 <!-- 
