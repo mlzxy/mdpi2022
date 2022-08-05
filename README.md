@@ -1,6 +1,6 @@
 # MDPI 2022
 
-This repo contains source code for the experiments reported in the MDPI submission "Learning Low Precision Structured Subnetworks using Joint Layerwise Channel Pruning and Uniform Quantization".
+This repo contains source code for the experiments reported in the MDPI publication ["Learning Low Precision Structured Subnetworks using Joint Layerwise Channel Pruning and Uniform Quantization"](https://www.mdpi.com/2076-3417/12/15/7829).
 
 - Image Classification on Cifar100: folder [classification](classification/), based on [weiaicunzai/pytorch-cifar100](https://github.com/weiaicunzai/pytorch-cifar100).
 - Semantic Segmentation on Cityscape: folder [segmentation](segmentation/), based on [meetps/pytorch-semseg](https://github.com/meetps/pytorch-semseg) and [milesial/Pytorch-UNet](https://github.com/milesial/Pytorch-UNet)
@@ -82,9 +82,23 @@ USE_PUBLIC_QSPARSE=1 ./qr.sh cifar100/mobilenetv2/a75_mag_top_loc_st
 
 Note that the public qsparse library is not compatible with the one-shot pruning configuration, e.g.,`75_mag_top_loc_st_nly`, and will yield different results on weight pruning experiments because [qsparse-private](qsparse-private/) supports resetting bias and batchnorm parameters of pruned channels to zero ([code](qsparse-private/qsparse/sparse.py#L515)), in order to align the behavior of weight and activation pruning, while the public version does not. The results in our publication are based on the private version.
 
+## Citing
 
-<!-- 
+If you find this open source release useful, please reference in your paper:
 
-add citation bibtex
+> Zhang, X.; Colbert, I.; Das, S. Learning Low-Precision Structured Subnetworks Using Joint Layerwise Channel Pruning and Uniform Quantization. Appl. Sci. 2022, 12, 7829. https://doi.org/10.3390/app12157829
 
- -->
+```bibtex
+@Article{app12157829,
+	AUTHOR = {Zhang, Xinyu and Colbert, Ian and Das, Srinjoy},
+	TITLE = {Learning Low-Precision Structured Subnetworks Using Joint Layerwise Channel Pruning and Uniform Quantization},
+	JOURNAL = {Applied Sciences},
+	VOLUME = {12},
+	YEAR = {2022},
+	NUMBER = {15},
+	ARTICLE-NUMBER = {7829},
+	URL = {https://www.mdpi.com/2076-3417/12/15/7829},
+	ISSN = {2076-3417}
+}
+```
+
